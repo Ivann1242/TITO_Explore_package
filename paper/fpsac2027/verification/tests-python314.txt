@@ -1,0 +1,11 @@
+test_demonstration_and_quiet_api (test_orders.OrderTests.test_demonstration_and_quiet_api) ... ok
+test_exhaustive_small_families (test_orders.OrderTests.test_exhaustive_small_families) ... ok
+test_invalid_inputs (test_orders.OrderTests.test_invalid_inputs) ... ok
+test_reported_regressions (test_orders.OrderTests.test_reported_regressions) ... ok
+test_seeded_larger_periods (test_orders.OrderTests.test_seeded_larger_periods) ... ok
+test_seeded_mixed_orders (test_orders.OrderTests.test_seeded_mixed_orders) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 4.142s
+
+OK

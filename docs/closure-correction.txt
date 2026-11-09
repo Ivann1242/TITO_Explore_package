@@ -1,4 +1,4 @@
-Closure correction for version 0.1.1
+Closure correction (version 0.1.1) and starred-cell pruning (version 0.1.2)
 
 The earlier update_indicators rule marked only entries incident to a vertex
 on a cycle. It missed infinite families on paths that enter and leave such a

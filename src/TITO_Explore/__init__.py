@@ -33,4 +33,4 @@ __all__ = [
     "reflection_rows_to_blocks_and_order",
 ]
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"

@@ -1,15 +1,21 @@
 {
   "status": "PASS",
+  "package_version": "0.1.2",
   "python_versions": [
-    "3.12.14",
+    "3.13.7",
     "3.14.5"
   ],
-  "ordered_pairs": 839,
+  "ordered_pairs": 855,
   "exhaustive_pairs": 333,
   "seeded_pairs": 500,
-  "random_seed": 20261106,
+  "seeded_larger_period_pairs": 16,
+  "random_seeds": [
+    20261106,
+    20261109
+  ],
   "regressions": 5,
   "demonstration": 1,
   "command": "python -m unittest discover -s tests -v",
-  "limitations": "Bounded checks, not an unrestricted proof. CI configuration is included; no remote CI completion is implied."
+  "ci": "GitHub Actions workflow for Python 3.10-3.13 (.github/workflows/tests.yml)",
+  "limitations": "Bounded checks, not an unrestricted proof."
 }

@@ -2,18 +2,20 @@ Editable figure sources for the FPSAC 2027 manuscript
 
 Figure 1: software-layout/source/representation.html / .svg
 Figure 2: software-layout/source/computed-tables.html / .svg
-Figure 3: software-layout/source/join-mechanism.html / .svg
 Authoring source: software-layout/source/design.mjs
 HTML/SVG-to-PDF exporter and geometry checks: source/export.mjs
 Independent data computation: source/compute-example.py
 Exact inputs, raw and reduced tables, results and source hashes: source/example-data.json
-Embedded DejaVu Sans subset and its license: software-layout/fonts/
+Fonts (unmodified TeX Gyre Pagella regular, italic and math, matching the
+Palatino text of the paper) and the GUST Font License: software-layout/fonts/
 Matching PDFs: software-layout/pdf/
 
 Edit design.mjs for changes that survive regeneration. The exporter measures
 window glyphs to align labels and waning underlines. Tables include every
 cell with equal cell dimensions; starred entries are displayed by their
-minimum, and all finite entries are preserved. Blue/red identify inputs A/B.
+minimum, and all finite entries are preserved. Dark blue/dark orange identify
+inputs A/B and differ in lightness, so they stay distinct from black (both
+inputs) in greyscale. Variables are italic, as in the text.
 No numerical observations are sampled or excluded.
 
 Rebuild using Node.js and Python >= 3.10:

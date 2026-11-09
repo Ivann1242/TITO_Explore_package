@@ -1,6 +1,6 @@
 # TITO_Explore
 
-TITO_Explore 0.1.1 is a standalone Python package for translation-invariant total orders (TITOs) of period n. It computes normalized windows, exact inversion sets, weak-order comparison and joins in the TITO lattice, including same-residue (imaginary) inversions. It has no runtime dependencies and requires Python 3.10 or later. Source code is licensed under [MIT](LICENSE).
+TITO_Explore 0.1.2 is a standalone Python package for translation-invariant total orders (TITOs) of period n. It computes normalized windows, exact inversion sets, weak-order comparison and joins in the TITO lattice, including same-residue (imaginary) inversions. It has no runtime dependencies and requires Python 3.10 or later. Source code is licensed under [MIT](LICENSE).
 
 ## Installation
 
@@ -13,7 +13,7 @@ python -m venv .venv
 python -m pip install .
 ```
 
-Use the exact Git commit recorded in the paper's `REPRODUCIBILITY.txt` when reproducing its results. Do not substitute the older 0.1.0 code. Version 0.1.1 corrects propagation of infinite inversion families through cycles; see [the correction and its scope](docs/closure-correction.txt).
+Use the exact Git commit recorded in the paper's `REPRODUCIBILITY.txt` when reproducing its results. Do not substitute the older 0.1.0 code. Version 0.1.1 corrects propagation of infinite inversion families through cycles. Version 0.1.2 keeps only the least increment of every starred closure cell, which leaves results unchanged and makes joins fast at larger periods (about 0.07 s at period 64 on the seeded benchmark below). See [the correction, the pruning argument and their scope](docs/closure-correction.txt).
 
 ## Quick start
 
@@ -59,12 +59,13 @@ Comparison performs O(n²) residue-component tests under unit-cost integer arith
 python -m unittest discover -s tests -v
 python examples/fpsac2027_join.py
 python examples/benchmark_join.py
+python examples/benchmark_scaling.py
 python paper/fpsac2027/fig/software-layout/source/compute-example.py
 ```
 
-The tests use independent integer-order ranks and bounded positive-path enumeration. They check 333 ordered pairs in exhaustive small waxing-window families, 500 seeded mixed-block pairs, five reported period-4 regressions, and the period-6 example (839 pairs total). Exact rules and bounds are in [the tests](tests/test_orders.py). They check inversions, normalization, comparison, both join interfaces, commutativity, idempotence and upper bounds, plus invalid inputs. Bounded checks are evidence, not a proof for arbitrary inputs. GitHub Actions is configured for Python 3.10–3.13.
+The tests use independent integer-order ranks and bounded positive-path enumeration. They check 333 ordered pairs in exhaustive small waxing-window families, 500 seeded mixed-block pairs at periods 2–6, 16 seeded pairs at periods 12–32, five reported period-4 regressions, and the period-6 example (855 pairs total). Exact rules and bounds are in [the tests](tests/test_orders.py). They check inversions, normalization, comparison, both join interfaces, commutativity, idempotence and upper bounds, plus invalid inputs. Bounded checks are evidence, not a proof for arbitrary inputs. GitHub Actions is configured for Python 3.10–3.13.
 
-The [paper bundle](paper/fpsac2027/README.txt) contains the figure data, independent example verifier, editable HTML/SVG generator, embedded font and PDF exporter. No private manuscript files are needed. The benchmark reports measured local timings and environment, rather than a cross-machine performance guarantee.
+The [paper bundle](paper/fpsac2027/README.txt) contains the figure data, independent example verifier, editable HTML/SVG generator, embedded font and PDF exporter. No private manuscript files are needed. The benchmarks report measured local timings and environment, rather than a cross-machine performance guarantee; `benchmark_scaling.py` records seeded random incomparable pairs at periods 4–64.
 
 ## References and development
 

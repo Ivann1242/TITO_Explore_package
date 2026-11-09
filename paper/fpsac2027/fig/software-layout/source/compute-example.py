@@ -122,10 +122,10 @@ for a,b,star in api_rows:
 assert api_expansion == direct_j
 
 data = dict(
-    provenance=dict(repository='https://github.com/emmaycl/TITO_Explore_package',
+    provenance=dict(repository='https://github.com/Ivann1242/TITO_Explore_package',
                     version=__import__('TITO_Explore').__version__,
                     source_sha256={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(Path(__import__('TITO_Explore').__file__).parent.glob('*.py'))},
-                    example='Constructed worked input, executed with corrected version 0.1.1',
+                    example='Constructed worked input, executed with version ' + __import__('TITO_Explore').__version__,
                     display_reduction='Starred cell bases reduced to their minimum; finite bases retained'),
     inputs=dict(A=pack(A),B=pack(B)), output=pack(J), comparison=comparison,
     comparisons=detailed, inversion_A=reduce_matrix(inv_a), inversion_B=reduce_matrix(inv_b),

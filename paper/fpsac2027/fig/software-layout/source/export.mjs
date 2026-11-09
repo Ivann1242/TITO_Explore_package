@@ -12,7 +12,8 @@ const specs=JSON.parse(await fs.readFile(path.join(here,'manifest.json'),'utf8')
 const report=[];
 for(const s of specs){
  await page.goto(pathToFileURL(path.join(here,s.stem+'.html')).href);
- await page.evaluate(()=>document.fonts.ready);
+ // Load every declared face (text, italic and math fallback) before measuring glyphs.
+ await page.evaluate(async()=>{await Promise.all([...document.fonts].map(f=>f.load()));await document.fonts.ready;});
  // Place underlines below the actual glyph bounds, not through the brackets.
  await page.locator('svg').evaluate(svg=>{
   svg.querySelectorAll('[data-window-row]').forEach(row=>{

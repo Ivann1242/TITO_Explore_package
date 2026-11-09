@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "Please cite the software version and the accompanying preprint."
 title: "TITO_Explore: computing with translation-invariant total orders"
 type: software
-version: 0.1.1
-date-released: 2026-11-06
+version: 0.1.2
+date-released: 2026-11-09
 license: MIT
 authors:
   - family-names: Jing

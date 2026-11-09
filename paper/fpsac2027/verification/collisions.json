@@ -5,20 +5,6 @@
     "textText": [],
     "pageClipping": [],
     "arrowAttachments": [
-      true,
-      true
-    ],
-    "note": "Cell backgrounds and intentional cell outlines are exempt; text/line crossings also reviewed in rendered PDF."
-  },
-  {
-    "figure": "join-mechanism",
-    "status": "PASS",
-    "textText": [],
-    "pageClipping": [],
-    "arrowAttachments": [
-      true,
-      true,
-      true,
       true
     ],
     "note": "Cell backgrounds and intentional cell outlines are exempt; text/line crossings also reviewed in rendered PDF."
@@ -29,6 +15,9 @@
     "textText": [],
     "pageClipping": [],
     "arrowAttachments": [
+      true,
+      true,
+      true,
       true
     ],
     "note": "Cell backgrounds and intentional cell outlines are exempt; text/line crossings also reviewed in rendered PDF."
