@@ -9,7 +9,7 @@ from TITO_Explore import (
     TranslationInvariantTotalOrder as TITO, compare_titos_overall,
     compute_tito_join_tito, process_tito_blocks, tito_to_inversion_set,
 )
-from TITO_Explore.join import compute_join_reflection_table
+from TITO_Explore.join import compute_closure, compute_join_reflection_table, inversion_matrix_to_edges
 
 
 def rank(order, x):
@@ -79,6 +79,12 @@ class OrderTests(unittest.TestCase):
         row_pairs = {(x, d) for x, y, star in rows
                      for d in (range(y - x, limit + 1, a.n) if star else [y - x]) if d <= limit}
         self.assertEqual(row_pairs, target)
+        edges = (inversion_matrix_to_edges(tito_to_inversion_set(a), a.n)
+                 + inversion_matrix_to_edges(tito_to_inversion_set(b), a.n))
+        for row in compute_closure(a.n, edges):
+            for values, star in row:
+                if star:  # pruned pass: a starred cell keeps only its least increment
+                    self.assertEqual(len(values), 1)
         self.assertLessEqual(ia | ib, target)
         self.assertEqual(inversions(compute_tito_join_tito(b, a), limit), target)
         self.assertEqual(inversions(compute_tito_join_tito(a, a), limit), ia)
@@ -105,6 +111,22 @@ class OrderTests(unittest.TestCase):
                 return TITO(n, len(blocks), blocks, [rng.randint(0, 1) for _ in blocks])
             a, b = make(), make()
             with self.subTest(case=case, a=a, b=b): self.check_pair(a, b)
+
+    def test_seeded_larger_periods(self):
+        # Periods that were out of reach before starred cells were pruned.
+        rng = random.Random(20261109)
+        for n in (12, 16, 24, 32):
+            def make(parts=None):
+                if parts is None:
+                    residues = list(range(n)); rng.shuffle(residues)
+                    cuts = [0] + [i for i in range(1, n) if rng.random() < 0.35] + [n]
+                    parts = [residues[a:b] for a, b in zip(cuts, cuts[1:])]
+                blocks = [[r + n * rng.randint(-3, 3) for r in p] for p in parts]
+                return TITO(n, len(blocks), blocks, [rng.randint(0, 1) for _ in blocks]), parts
+            for case in range(4):
+                a, parts = make()
+                b, _ = make(parts if case % 2 else None)
+                with self.subTest(n=n, case=case, a=a, b=b): self.check_pair(a, b, 4 * n + 20)
 
     def test_exhaustive_small_families(self):
         for n in (2, 3):

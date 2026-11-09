@@ -36,6 +36,26 @@ windows. Empty entries, finite sets and starred minima must agree with the
 closed table. This check is a consistency safeguard, not a substitute for the
 closure argument or the independent tests.
 
+Pruning starred cells. In the unpruned pass, redundant starred increments
+multiply along every path: on random mixed-block inputs the median size of
+the largest cell grew from 11 increments at n = 4 to 2463 at n = 12, and the
+pass cost grows with the square of that size. The pruned pass first computes
+the final star pattern from the union alone: reachability R in the union
+equals reachability in the closure, and a closure diagonal is nonempty exactly
+when its vertex lies on a union cycle, so R M R evaluated on the union gives
+the same stars as on the closure. Every cell predicted to be starred then
+keeps only its least increment throughout the pass. This is exact:
+(a) the least element of a sumset is the sum of the least elements, so every
+    least increment is unchanged;
+(b) a cell predicted unstarred never receives a sum through a starred cell
+    (that walk would make it starred), so finite cells keep exactly the
+    increments of the unpruned pass;
+(c) by (2) above, a starred cell is determined by its least increment.
+On 3840 random mixed-block pairs at periods 2--9 and all 26244 ordered pairs
+of the period-4 single-window family (shifts -1, 0, 1), the pruned and
+unpruned closures agree cell by cell after reducing starred cells to their
+minima; the largest stored list fell from 1305 to 9.
+
 The algorithm in arXiv:2607.11709v1, Algorithm 3, predates this correction.
 The software abstract explicitly records this difference; it does not claim
 that the old preprint proves the corrected algorithm or that v2 is published.

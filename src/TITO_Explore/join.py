@@ -85,14 +85,87 @@ def update_path(matrix: List[List[MatrixCell]], i: int, k: int, j: int) -> bool:
     return False
 
 
+def final_star_pattern(matrix: List[List[MatrixCell]]) -> Tuple[List[List[bool]], List[List[bool]]]:
+    """
+    Predicts, from the union matrix alone, which cells of the closure are
+    nonempty and which are starred.
+
+    Returns (nonempty, starred). A cell (i, j) of the closure is nonempty
+    exactly when the union digraph has a walk of positive length from i to j
+    (for i == j: when i lies on a cycle). It is starred exactly when such a
+    walk can traverse a starred union edge or a cycle; this is the R M R rule
+    of update_indicators, evaluated on the union instead of the closure.
+    Reachability is the same in both, and a closure diagonal is nonempty
+    exactly when its vertex lies on a union cycle, so both rules agree.
+    """
+    n = len(matrix)
+    reach = [[bool(matrix[i][j][0]) for j in range(n)] for i in range(n)]
+    for k in range(n):
+        row_k = reach[k]
+        for i in range(n):
+            if reach[i][k]:
+                row_i = reach[i]
+                for j in range(n):
+                    if row_k[j]:
+                        row_i[j] = True
+    reflexive = [[i == j or reach[i][j] for j in range(n)] for i in range(n)]
+    marked = [[(bool(matrix[a][b][0]) and bool(matrix[a][b][1])) or (a == b and reach[a][a])
+               for b in range(n)] for a in range(n)]
+    through_mark = [[any(reflexive[i][a] and marked[a][b] for a in range(n))
+                     for b in range(n)] for i in range(n)]
+    starred = [[reach[i][j] and any(through_mark[i][b] and reflexive[b][j] for b in range(n))
+                for j in range(n)] for i in range(n)]
+    return reach, starred
+
+
 def compute_closure(n: int, initial_edges: List[Edge]) -> List[List[MatrixCell]]:
-    """Runs Floyd-Warshall-style closure over the edge matrix."""
+    """
+    Runs the Floyd-Warshall-style closure over the edge matrix.
+
+    Starred cells of the closure are full period-n progressions from their
+    least increment, so only that least increment is kept for them. The star
+    pattern is predicted before the pass (final_star_pattern), which lets the
+    pass prune every eventually starred cell to its minimum as it goes.
+    Unstarred cells only receive sums of unstarred cells (a sum through a
+    starred cell would itself be starred), so they keep exactly the finite
+    increments of the unpruned pass. The minimum of a sumset is the sum of
+    the minima, so pruning never changes a least increment. Without pruning,
+    redundant starred increments multiply along every path and the cell
+    sizes grow rapidly with n.
+    """
     matrix = initialize_custom_matrix(n, initial_edges)
+    _nonempty, starred = final_star_pattern(matrix)
+    values = [[set(matrix[i][j][0]) for j in range(n)] for i in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if starred[i][j] and values[i][j]:
+                values[i][j] = {min(values[i][j])}
+
     for k in range(n):
         for i in range(n):
+            if i == k:
+                continue
+            values_ik = values[i][k]
+            if not values_ik:
+                continue
+            min_ik = min(values_ik)
+            starred_i = starred[i]
+            values_i = values[i]
             for j in range(n):
-                update_path(matrix, i, k, j)
-    return matrix
+                if j == k:
+                    continue
+                values_kj = values[k][j]
+                if not values_kj:
+                    continue
+                if starred_i[j]:
+                    candidate = min_ik + min(values_kj)
+                    current = values_i[j]
+                    if not current or candidate < next(iter(current)):
+                        values_i[j] = {candidate}
+                else:
+                    values_i[j] |= {a + b for a in values_ik for b in values_kj}
+
+    return [[(sorted(values[i][j]), int(starred[i][j])) for j in range(n)] for i in range(n)]
 
 
 def update_indicators(matrix: List[List[MatrixCell]]) -> List[List[MatrixCell]]:
@@ -157,6 +230,34 @@ def compute_join_reflection_table(
     return generate_reflection_table(final_matrix)
 
 
+def _compute_tito_join_with_closure(
+    tito1: TranslationInvariantTotalOrder,
+    tito2: TranslationInvariantTotalOrder,
+) -> Tuple[
+    Union[TranslationInvariantTotalOrder, Tuple[List[List[int]], List[int], Optional[Dict[str, Any]]]],
+    Optional[List[List[MatrixCell]]],
+]:
+    """Shared body of the join functions; also returns the closed matrix (None if comparable)."""
+    if tito1.n != tito2.n:
+        raise ValueError("Both TITOs must have the same modulus n.")
+
+    comparison = compare_titos_overall(tito1, tito2)
+    if comparison == "tito1 < tito2":
+        return tito2, None
+    if comparison == "tito1 > tito2":
+        return tito1, None
+    if comparison == "tito1 = tito2":
+        return tito1, None
+
+    inv1 = tito_to_inversion_set(tito1)
+    inv2 = tito_to_inversion_set(tito2)
+    edges = inversion_matrix_to_edges(inv1, tito1.n) + inversion_matrix_to_edges(inv2, tito1.n)
+    closure = compute_closure(tito1.n, edges)
+    final_matrix = update_indicators(closure)
+    table_rows = generate_reflection_table(final_matrix)
+    return reflection_rows_to_blocks_and_order(table_rows, tito1.n), final_matrix
+
+
 def compute_tito_join(
     tito1: TranslationInvariantTotalOrder,
     tito2: TranslationInvariantTotalOrder,
@@ -168,24 +269,7 @@ def compute_tito_join(
     is computed via reflection-table closure and returned in window/flag/report
     form.
     """
-    if tito1.n != tito2.n:
-        raise ValueError("Both TITOs must have the same modulus n.")
-
-    comparison = compare_titos_overall(tito1, tito2)
-    if comparison == "tito1 < tito2":
-        return tito2
-    if comparison == "tito1 > tito2":
-        return tito1
-    if comparison == "tito1 = tito2":
-        return tito1
-
-    inv1 = tito_to_inversion_set(tito1)
-    inv2 = tito_to_inversion_set(tito2)
-    edges = inversion_matrix_to_edges(inv1, tito1.n) + inversion_matrix_to_edges(inv2, tito1.n)
-    closure = compute_closure(tito1.n, edges)
-    final_matrix = update_indicators(closure)
-    table_rows = generate_reflection_table(final_matrix)
-    return reflection_rows_to_blocks_and_order(table_rows, tito1.n)
+    return _compute_tito_join_with_closure(tito1, tito2)[0]
 
 
 def compute_tito_join_tito(
@@ -199,7 +283,7 @@ def compute_tito_join_tito(
     inputs return the larger original TITO; otherwise the closure result is
     reconstructed into a TranslationInvariantTotalOrder.
     """
-    join_result = compute_tito_join(tito1, tito2)
+    join_result, expected = _compute_tito_join_with_closure(tito1, tito2)
 
     if isinstance(join_result, TranslationInvariantTotalOrder):
         return join_result
@@ -214,9 +298,7 @@ def compute_tito_join_tito(
         vectors=blocks,
         waxing_waning=waxing_waning,
     )
-    edges = inversion_matrix_to_edges(tito_to_inversion_set(tito1), tito1.n)
-    edges += inversion_matrix_to_edges(tito_to_inversion_set(tito2), tito1.n)
-    expected = update_indicators(compute_closure(tito1.n, edges))
+    # Check the reconstruction against the closure computed above.
     actual = tito_to_inversion_set(result)
 
     def canonical(cell):

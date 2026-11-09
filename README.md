@@ -45,13 +45,13 @@ All functions below are exported from `TITO_Explore`:
 | `process_tito_blocks(A)` | Normalized list of windows; does not reorder blocks or change A. The least residue starts each window. |
 | `tito_to_inversion_set(A)` | n by n matrix: `None` or `([increments], star)`. Cell `[a][r]` describes inversions `(a,a+d)` with `d>0` and `(a+d)%n == r`. Star 1 adds all nonnegative multiples of n to each listed increment. |
 | `compare_titos_overall(A,B)` | Exactly `"tito1 < tito2"`, `"tito1 > tito2"`, `"tito1 = tito2"` or `"incomparable"`. |
-| `compute_join_reflection_table(A,B)` | List of triples `(a,a+d,star)`. The second field is a target integer, not an increment. Redundant starred representatives may occur. |
+| `compute_join_reflection_table(A,B)` | List of triples `(a,a+d,star)`. The second field is a target integer, not an increment. Each starred cell contributes one triple, its least increment. |
 | `compute_tito_join_tito(A,B)` | Join TITO. For comparable inputs it returns an original input object, possibly unnormalized. Otherwise it reconstructs windows and verifies their full symbolic table against the closure; inconsistency raises `ValueError`. |
 | `compute_tito_join(A,B)` | Legacy interface: an original TITO for comparable inputs, otherwise `(windows, flags, diagnostic_report)`. Prefer the object-returning function. |
 
 Binary operations require equal periods. Reflection indices include same-residue pairs, which record waning behavior. Forgetting these indices gives the extended weak order quotient; this package computes in the TITO lattice itself. It does not implement other affine types, Hasse diagrams, meets or a SageMath adapter.
 
-Comparison performs O(n²) residue-component tests under unit-cost integer arithmetic. The weighted closure pass costs O(n³ W²), where W is the largest stored increment-list size, including redundant starred values; Boolean star propagation costs O(n³). These bounds describe closure stages, not the entire checked reconstruction. Large integer shifts can produce large lists and expensive joins.
+Comparison performs O(n²) residue-component tests under unit-cost integer arithmetic. The star pattern of the closure is predicted from the union by Boolean reachability in O(n³), so the weighted pass keeps only the least increment of every starred cell. The pass then costs O(n³ W²), where W is the largest stored increment list; only finite cells can hold more than one increment. These bounds describe closure stages, not the entire checked reconstruction.
 
 ## Validation and reproduction
 
@@ -70,4 +70,4 @@ The [paper bundle](paper/fpsac2027/README.txt) contains the figure data, indepen
 
 The companion preprint is Yifan Jing, Emma Yicheng Lou, Shaotian Sun and Yuxuan Wu, *Computing Tools for Translation-Invariant Total Orders*, arXiv:2607.11709 (2026). Its original Algorithm 3 needs the correction documented above. Mathematical definitions follow Grant Barkley's work on extended weak order for affine symmetric groups. See `CITATION.cff` for software citation metadata.
 
-Report bugs, preferably with input windows and flags, through GitHub issues. Development uses pull requests and regression tests. Planned work includes reducing redundant starred increments and exploring SageMath interoperability. No dedicated SageMath integration is currently available.
+Report bugs, preferably with input windows and flags, through GitHub issues. Development uses pull requests and regression tests. Planned work includes exploring SageMath interoperability. No dedicated SageMath integration is currently available.
